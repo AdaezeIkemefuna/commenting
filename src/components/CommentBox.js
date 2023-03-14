@@ -64,7 +64,7 @@ export default function CommentBox() {
             type="text"
             placeholder="Type here..."
             value={comment}
-            onChange={(e) => setComment(e.target.value.trim())}
+            onChange={(e) => setComment(e.target.value)}
           />
           <button>send</button>
         </form>
