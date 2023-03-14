@@ -1,14 +1,14 @@
-import AuthContext from "../context/AuthContext";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import ably from "../components/Ably";
 import axios from "axios";
 
 export default function CommentBox() {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
-  const timestamp = Date.now();
+  const timestamp = new Date(Date.now());
   var channel = ably.channels.get("comments");
   const name = localStorage.getItem("username");
+  let commentEnd = null;
 
   const addComment = async (e) => {
     e.preventDefault();
@@ -33,37 +33,42 @@ export default function CommentBox() {
       channel.history((err, page) => {
         const historyMessages = Array.from(page.items, (item) => item.data);
         setComments(historyMessages);
-        // Subscribe to channel
-        channel.subscribe("add_comment", (message) => {
-          console.log(message);
-        });
       });
     });
   });
   console.log(comments);
+  useEffect(() => {
+    commentEnd.scrollIntoView({ behaviour: "smooth" });
+  });
   return (
-    <div>
-      <h1>Join The conversation</h1>
-
-      <div>
-        {comments.map((e, index) => {
-          return (
-            <div key={index}>
-              <img src={e.avatar} alt="alt" width="20px" height="20px" />
-              <span>{e.name}</span>
-              <span>{e.comment}</span>
-            </div>
-          );
-        })}
-      </div>
-      <form onSubmit={addComment}>
-        <input
-          type="text"
-          value={comment}
-          onChange={(e) => setComment(e.target.value.trim())}
-        />
-        <button>send</button>
-      </form>
+    <div className="home">
+      <>
+        <div className="comments">
+          {comments.map((e, index) => {
+            return (
+              <div key={index} className="comment">
+                <span>{e.name}</span>
+                <span className="date">{e.timestamp.toString()}</span>
+                <div>{e.comment}</div>
+              </div>
+            );
+          })}
+          <div
+            ref={(element) => {
+              commentEnd = element;
+            }}
+          ></div>
+        </div>
+        <form onSubmit={addComment} className="form">
+          <input
+            type="text"
+            placeholder="Type here..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value.trim())}
+          />
+          <button>send</button>
+        </form>
+      </>
     </div>
   );
 }
